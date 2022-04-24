@@ -5,12 +5,17 @@ using UnityEngine;
 public class boatMovimentation : MonoBehaviour
 {
     float z, x;
+    public float velocityPowerUp;
 
+    void Start()
+    {
+        velocityPowerUp = 10;
+    }
     // Update is called once per frame
     void Update()
     {
-        z = Input.GetAxis("Vertical");
-        x = Input.GetAxis("Horizontal");
+        z = Input.GetAxis("Vertical") * velocityPowerUp;
+        x = Input.GetAxis("Horizontal") * velocityPowerUp;
 
         if (z != 0 || x != 0)
             transform.Translate(x * Time.deltaTime, 0, z * Time.deltaTime);
@@ -20,7 +25,7 @@ public class boatMovimentation : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Item"))
         {
-            //aumenta a velocidade por 5 segundos
+            velocityPowerUp += 5; //adicionar o tempo
         }
     }
 }
