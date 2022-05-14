@@ -9,7 +9,7 @@ public class Sounds : MonoBehaviour
     public static AudioClip buttonSound;
 
     public static AudioSource audioComponent;
-    private static float volume = 0.05f;
+    //private static float volume = 0.05f;
     // Start is called before the first frame update
     void Start()
     {
@@ -24,7 +24,7 @@ public class Sounds : MonoBehaviour
         switch (clip)
         {
             case "item":
-                audioComponent.PlayOneShot(item, volume);
+                audioComponent.PlayOneShot(item);
                 break;
 
             case "buttonSound":
