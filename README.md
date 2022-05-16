@@ -6,3 +6,7 @@ The idea is to be a relaxing and competitive boat racing game, where new challen
 **Collaborators**
 * Izabella Santos: programming and modelling
 * Beatriz Rocha: programming and modelling
+
+**How to play**
+* controls: keyboard arrows or AWSD to move your boat / ESC to pause menu
+* Supported screens: fullhd and hd
