@@ -7,6 +7,10 @@ TagManager:
   - Item
   - finishLine
   - barquinho
+  - life
+  - fuel
+  - checkpoint
+  - Enemy
   layers:
   - Default
   - TransparentFX

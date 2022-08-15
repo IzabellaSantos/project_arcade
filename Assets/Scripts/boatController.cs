@@ -3,52 +3,92 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+
+[System.Serializable]
+public class AxleInfo
+{
+    public WheelCollider leftWheel;
+    public WheelCollider rightWheel;
+    public bool motor;
+    public bool steering;
+}
+
 public class boatController : MonoBehaviour
 {
-    public Vector3 COM;
-    [Space(15)]
-    private float steerSpeed = 10f, movementThresold = 5f;
-
-    Transform m_COM;
-    float verticalInput, movementFactor, horizontalInput, steerFactor;
+    public List<AxleInfo> axleInfos;
+    public float maxMotorTorque;
+    public float maxSteeringAngle;
+    public float motor, steering;
+    [SerializeField] Text speedText;
     GameObject player;
     playerStatus boat;
+    private float powerUpTime, aumentaVelocidade;
+    Transform boatTransform;
 
     private void Start()
     {
         player = GameObject.FindWithTag("Player"); //acha o player
         boat = player.GetComponent<playerStatus>();
-    }
-    void FixedUpdate()
-    {
-        Balance();
-        Movement();
-        Steer();
+        aumentaVelocidade = 1;
+        boatTransform = this.GetComponent<Transform>();
     }
 
-    void Balance()
+    private void Update()
     {
-        if (!m_COM)
+        speedText.text = (motor / 100).ToString("0") + "km/h"; // mostra a velocidade atual do barco
+
+        //regulagem de velocidade quando pega o powerUp (gasolina)
+        if (powerUpTime >= 0)
+            powerUpTime -= 1 * Time.deltaTime;
+
+        if (powerUpTime <= 0)
+            aumentaVelocidade = 1;
+
+        if (player.name == "simpleBoat")
         {
-            m_COM = new GameObject("COM").transform;
-            m_COM.SetParent(transform);
+            //muda a cor quando você tem um powerUp ativo
+            if ((motor / 100) > 10)
+                speedText.color = Color.green;
+            else
+                speedText.color = Color.white;
         }
 
-        m_COM.position = COM;
-        GetComponent<Rigidbody>().centerOfMass = m_COM.position;
     }
 
-    void Movement()
+    public void FixedUpdate()
     {
-        verticalInput = Input.GetAxis("Vertical");
-        movementFactor = Mathf.Lerp(movementFactor, verticalInput, Time.deltaTime / movementThresold);
-        transform.Translate(0.0f, 0.0f, movementFactor * boat.speed);
+        motor = maxMotorTorque * Input.GetAxis("Vertical") * aumentaVelocidade;
+        steering = maxSteeringAngle * Input.GetAxis("Horizontal");
+
+        foreach (AxleInfo axleInfo in axleInfos)
+        {
+            if (axleInfo.steering)
+            {
+                axleInfo.leftWheel.steerAngle = steering;
+                axleInfo.rightWheel.steerAngle = steering;
+            }
+            if (axleInfo.motor)
+            {
+                axleInfo.leftWheel.motorTorque = motor;
+                axleInfo.rightWheel.motorTorque = motor;
+            }
+        }
     }
 
-    void Steer()
+
+    private void OnTriggerEnter(Collider otherObject)
     {
-        horizontalInput = Input.GetAxis("Horizontal");
-        steerFactor = Mathf.Lerp(steerFactor, horizontalInput * verticalInput, Time.deltaTime / movementThresold);
-        transform.Rotate(0.0f, steerFactor * steerSpeed, 0.0f);
+        if (otherObject.gameObject.CompareTag("Item"))
+        {
+            Destroy(otherObject.gameObject);
+            Sounds.PlaySound("item");
+            boat.fuel += 30;
+
+            if (player.name == "simpleBoat")
+            { //ganha velocidade se for o simple boat
+                aumentaVelocidade = 3;
+                powerUpTime = 3;
+            }
+        }
     }
 }
